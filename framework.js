@@ -73,4 +73,8 @@ function framework() {
   };
 }
 
+framework.json = function () {
+  console.log("JSON middleware created");
+};
+
 module.exports = framework;
