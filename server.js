@@ -4,6 +4,26 @@ const app = framework();
 
 const items = [];
 
+function validateItem(item) {
+  if (!item.name || !item.price || !item.size) {
+    return false;
+  }
+
+  if (typeof item.name !== "string") {
+    return false;
+  }
+
+  if (typeof item.price !== "number" || item.price <= 0) {
+    return false;
+  }
+
+  if (!["s", "m", "l"].includes(item.size)) {
+    return false;
+  }
+
+  return true;
+}
+
 app.use(framework.json());
 
 app.get("/items", (req, res) => {
@@ -25,6 +45,11 @@ app.get("/items/:id", (req, res) => {
 
 app.post("/items", (req, res) => {
   const item = req.body;
+
+  if (!validateItem(item)) {
+    res.statusCode = 400;
+    return res.end("Invalid item");
+  }
 
   item.id = items.length + 1;
 
