@@ -88,4 +88,9 @@ app.delete("/items/:id", (req, res) => {
   res.end("Item deleted");
 });
 
+app.error((error, req, res) => {
+  res.statusCode = 500;
+  res.end("Internal Server Error");
+});
+
 app.listen(3000);

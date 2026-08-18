@@ -1,6 +1,7 @@
 const http = require("http");
 const routes = [];
 const middlewares = [];
+const errorHandlers = [];
 
 function framework() {
   const server = http.createServer((req, res) => {
@@ -40,10 +41,18 @@ function framework() {
     });
 
     const middleware = middlewares[0];
-
-    middleware(req, res, () => {
+    try {
       route.handler(req, res);
-    });
+    } catch (error) {
+      const errorHandler = errorHandlers[0];
+
+      if (errorHandler) {
+        errorHandler(error, req, res);
+      } else {
+        res.statusCode = 500;
+        res.end("Internal Server Error");
+      }
+    }
   });
 
   return {
@@ -81,6 +90,10 @@ function framework() {
 
     use: function (middleware) {
       middlewares.push(middleware);
+    },
+
+    error: function (handler) {
+      errorHandlers.push(handler);
     },
 
     listen: function (port) {
