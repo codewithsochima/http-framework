@@ -5,7 +5,19 @@ const middlewares = [];
 function framework() {
   const server = http.createServer((req, res) => {
     const route = routes.find((route) => {
-      return route.method === req.method && route.path === req.url;
+      if (route.method !== req.method) {
+        return false;
+      }
+      const routeParts = route.path.split("/");
+      const urlParts = req.url.split("/");
+
+      if (routeParts.length !== urlParts.length) {
+        return false;
+      }
+
+      return routeParts.every((part, index) => {
+        return part.startsWith(":") || part === urlParts[index];
+      });
     });
 
     console.log(route);
@@ -15,14 +27,26 @@ function framework() {
       return res.end("Route not found");
     }
 
+    req.params = {};
+
+    const routeParts = route.path.split("/");
+    const urlParts = req.url.split("/");
+
+    routeParts.forEach((part, index) => {
+      if (part.startsWith(":")) {
+        const paramName = part.slice(1);
+        req.params[paramName] = urlParts[index];
+      }
+    });
+
     const middleware = middlewares[0];
 
     middleware(req, res, () => {
       route.handler(req, res);
     });
-  });;
+  });
 
-    return {
+  return {
     get: function (path, handler) {
       routes.push({
         method: "GET",
