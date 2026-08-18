@@ -49,7 +49,17 @@ app.put("/items/:id", (req, res) => {
   res.end("Item updated");
 });
 
-app.delete("/items", (req, res) => {
+app.delete("/items/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const itemIndex = items.findIndex((item) => item.id === id);
+
+  if (itemIndex === -1) {
+    res.statusCode = 404;
+    return res.end("Item not found");
+  }
+
+  items.splice(itemIndex, 1);
   res.end("Item deleted");
 });
 
