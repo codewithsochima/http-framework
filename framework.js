@@ -21,7 +21,7 @@ function framework() {
       });
     });
 
-    console.log(route);
+
 
     if (!route) {
       res.statusCode = 404;
@@ -41,18 +41,21 @@ function framework() {
     });
 
     const middleware = middlewares[0];
-    try {
-      route.handler(req, res);
-    } catch (error) {
-      const errorHandler = errorHandlers[0];
 
-      if (errorHandler) {
-        errorHandler(error, req, res);
-      } else {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+    middleware(req, res, () => {
+      try {
+        route.handler(req, res);
+      } catch (error) {
+        const errorHandler = errorHandlers[0];
+
+        if (errorHandler) {
+          errorHandler(error, req, res);
+        } else {
+          res.statusCode = 500;
+          res.end("Internal Server Error");
+        }
       }
-    }
+    });
   });
 
   return {

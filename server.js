@@ -3,6 +3,7 @@ const framework = require("./framework");
 const app = framework();
 
 const items = [];
+let nextId = 1;
 
 function validateItem(item) {
   if (!item.name || !item.price || !item.size) {
@@ -51,7 +52,8 @@ app.post("/items", (req, res) => {
     return res.end("Invalid item");
   }
 
-  item.id = items.length + 1;
+  item.id = nextId;
+  nextId++;
 
   items.push(item);
 
