@@ -32,9 +32,23 @@ app.post("/items", (req, res) => {
 
   res.end("Item created");
 });
-app.put("/items", (req, res) => {
+app.put("/items/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const item = items.find((item) => item.id === id);
+
+  if (!item) {
+    res.statusCode = 404;
+    return res.end("Item not found");
+  }
+
+  item.name = req.body.name;
+  item.price = req.body.price;
+  item.size = req.body.size;
+
   res.end("Item updated");
 });
+
 app.delete("/items", (req, res) => {
   res.end("Item deleted");
 });
