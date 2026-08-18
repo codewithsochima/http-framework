@@ -1,6 +1,8 @@
 const framework = require("./framework");
 const app = framework();
 
+app.use(framework.json());
+
 app.get("/items", (req, res) => {
   res.end("Here are the items");
 });

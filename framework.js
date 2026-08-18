@@ -1,10 +1,9 @@
 const http = require("http");
 const routes = [];
+const middlewares = [];
 
 function framework() {
   const server = http.createServer((req, res) => {
-    let body = "";
-
     const route = routes.find((route) => {
       return route.method === req.method && route.path === req.url;
     });
@@ -16,25 +15,14 @@ function framework() {
       return res.end("Route not found");
     }
 
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
+    const middleware = middlewares[0];
 
-    req.on("end", () => {
-      if (body) {
-        try {
-          req.body = JSON.parse(body);
-        } catch (error) {
-          res.statusCode = 400;
-          return res.end("Invalid JSON");
-        }
-      }
-
+    middleware(req, res, () => {
       route.handler(req, res);
     });
-  });
+  });;
 
-  return {
+    return {
     get: function (path, handler) {
       routes.push({
         method: "GET",
@@ -67,6 +55,10 @@ function framework() {
       });
     },
 
+    use: function (middleware) {
+      middlewares.push(middleware);
+    },
+
     listen: function (port) {
       server.listen(port);
     },
@@ -74,7 +66,25 @@ function framework() {
 }
 
 framework.json = function () {
-  console.log("JSON middleware created");
+  return function (req, res, next) {
+    let body = "";
+
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on("end", () => {
+      if (body) {
+        try {
+          req.body = JSON.parse(body);
+        } catch (error) {
+          res.statusCode = 400;
+          return res.end("Invalid JSON");
+        }
+      }
+      next();
+    });
+  };
 };
 
 module.exports = framework;
